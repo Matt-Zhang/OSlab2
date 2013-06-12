@@ -36,5 +36,6 @@ init_idt(void) {
 	idt[0x80] = GATE(STS_TG32, KSEL(SEG_KCODE), vecsys, DPL_USER);
 
 	set_idt(idt, sizeof(idt));
+	init_irq();			//Set the init value of irq_functions in irq_handle.c 
 }
 

@@ -53,6 +53,7 @@
 
 // IDT size
 #define NR_IRQ      256         // IDT size
+#define NR_TF       10          // MAX interrupt nested in one process
 
 // The following macros will not be seen by the assembler
 #ifndef __ASSEMBLER__
@@ -153,14 +154,15 @@ struct Semaphore {
 };
 typedef struct Semaphore Semaphore;
 
-enum State{STOPPED, RUNNING};
+enum State{STOPPED, RUNNING, INTERRUPTED};
 typedef enum State State;
 	
 struct PCB {
-	TrapFrame *tf;
+	TrapFrame *tf[NR_TF];
 	State state;
 	int pid;
 	int count_lock;
+	int count_tf;
 	char kstack[STACK_SIZE];	
 	ListHead link;
     ListHead semq;

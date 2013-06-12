@@ -3,16 +3,20 @@
 #include "x86.h"
 #include "debug.h"
 #include "string.h"
-
+#include "thread.h"
+#include "irq.h"
+#include "drivers/time.h"
+#define PORT_PIC_MS    0x20
+#define PORT_PIC_SL    0xA0
 pid_t TIME;
 
 long jiffy = 0;
-void init_timer(void);
 void timerd(void);
 static Time rt;
 
 void init_i8253(void);
-void update_sched(void);
+//void update_sched(void);
+void schedule();
 void update_jiffy(void);
 int read_rtc(int);
 
@@ -21,7 +25,7 @@ void init_timer(void) {
 	add_irq_handle(0, update_sched);
 	add_irq_handle(0, update_jiffy);
 
-	int tmp;
+/*	int tmp;
 	do {
 		rt.second = read_rtc(0);
 		rt.minute = read_rtc(2);
@@ -31,8 +35,8 @@ void init_timer(void) {
 		rt.year = read_rtc(9) + 2000;
 		tmp = read_rtc(0);
 	} while (tmp != rt.second);
-
-};
+*/
+}
 
 static int md(int year, int month) {
 	boolean leap = (year % 400 == 0) || (year % 4 == 0 && year % 100 != 0);
@@ -47,13 +51,11 @@ void update_jiffy(void) {
 		if (rt.second >= 60) { rt.second = 0; rt.minute ++; }
 		if (rt.minute >= 60) { rt.minute = 0; rt.hour ++; }
 		if (rt.hour >= 24)   { rt.hour = 0;   rt.day ++;}
-		if (rt.day >= md(rt.year, rt.month)) { rt.day = 1; rt.month ++; } 
 		if (rt.month >= 13)  { rt.month = 1;  rt.year ++; }
 	}
 }
-
 void update_sched(void) {
-	need_sched = TRUE;
+	schedule();
 }
 
 void init_i8253(void) {

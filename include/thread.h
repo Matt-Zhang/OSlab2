@@ -5,9 +5,9 @@
 
 extern PCB* pcb_current;
 
-PCB *schedule(void);
-void switch_event(struct TrapFrame* tf);
-struct PCB *create_kthread(void *entry);
+void schedule(void);
+TrapFrame* switch_event(struct TrapFrame* tf);
+PCB *create_kthread(void *entry);
 
 
 static inline void 

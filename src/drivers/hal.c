@@ -1,6 +1,9 @@
 #include "kernel.h"
 #include "debug.h"
 #include "string.h"
+#include "thread.h"
+#include "drivers/hal.h"
+#include "msg.h"
 
 #define NR_DEV 64
 
@@ -41,7 +44,7 @@ void hal_list(void) {
 	}
 	unlock();
 }
-
+/* Get the device from name */
 Device *hal_get(const char *name) {
 	lock();
 	ListHead *it;
@@ -57,7 +60,7 @@ Device *hal_get(const char *name) {
 }
 
 static size_t
-dev_rw(int type, Device *dev, off_t offset, void *buf, size_t count) {
+dev_rw(int type, Device *dev, size_t offset, void *buf, size_t count) {
 	DevMessage m;
 	m.header.type = type;
 	m.dev_id = dev->dev_id;
@@ -70,12 +73,12 @@ dev_rw(int type, Device *dev, off_t offset, void *buf, size_t count) {
 }
 
 size_t
-dev_read(Device *dev, off_t offset, void *buf, size_t count) {
+dev_read(Device *dev, size_t offset, void *buf, size_t count) {
 	return dev_rw(MSG_DEVRD, dev, offset, buf, count);
 }
 
 size_t
-dev_write(Device *dev, off_t offset, void *buf, size_t count) {
+dev_write(Device *dev, size_t offset, void *buf, size_t count) {
 	return dev_rw(MSG_DEVWR, dev, offset, buf, count);
 }
 

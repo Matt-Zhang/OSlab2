@@ -5,6 +5,8 @@
 
 void *memcpy(void *dst, const void *src, size_t count);
 void *memset(void *dst, int val, size_t count);
+int strcmp(const char *str1,const char *str2);
+int strlen(const char *str);
 
 char *itoa(int value, int base);
 char *itoa_buf(int value, char *buf, int base);

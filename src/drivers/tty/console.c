@@ -1,11 +1,11 @@
 #include "x86.h"
-#include "mods/tty.h"
-#include "mods/kvm.h"
-#include "mods/irq.h"
-#include "mods/time.h"
+#include "drivers/tty.h"
+#include "vm.h"
+#include "irq.h"
+#include "drivers/time.h"
 #include "debug.h"
 #include "string.h"
-#include "term.h"
+#include "drivers/term.h"
 #include "kernel.h"
 
 Console ttys[NR_TTY];
@@ -22,7 +22,7 @@ static uint16_t
 draw(char ch) {
 	return (C_BLACK << 12) | (C_WHITE << 8) | ch;
 }
-
+/* screen up */
 static void
 scrup(Console *c) {
 	int i;
@@ -44,7 +44,7 @@ next(Console *c) {
 	}
 	c->pos ++;
 }
-
+/* add the ch into buffer to draw */
 static void
 putc(Console *c, char ch) {
 	*(c->vbuf + c->pos) = draw(ch);
@@ -88,7 +88,7 @@ movr(Console *c) {
 	}
 	return FALSE;
 }
-
+/* Write on the tty and the materials are prepared in the process calling this function */
 void
 consl_sync(Console *c) {
 	int i;
@@ -143,7 +143,7 @@ get_cooked(Console *c, char *buf, int count) {
 	}
 	return nread;
 }
-
+/* Return the message back to TTY ,tell it the nread contained in header.type */
 void
 read_request(DevMessage *m) {
 	Console *c = &ttys[m->dev_id];
@@ -205,7 +205,7 @@ consl_accept(Console *c, char ch) {
 	consl_sync(c);
 }
 
-
+/* The detail function of different key , prepare for the drawing in consl_sync */
 void
 consl_feed(Console *c, int key) {
 	switch (key) {

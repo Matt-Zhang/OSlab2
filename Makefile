@@ -1,6 +1,6 @@
 CC      = gcc
 LD      = ld
-CFLAGS  = -m32 -static -O2 -g -MD -Wall -std=gnu89 -I./include \
+CFLAGS  = -m32 -static -g -MD -Wall -std=gnu89 -I./include \
 		 -fno-builtin -fno-stack-protector -fno-omit-frame-pointer
 ASFLAGS = -m32 -MD -g -I./include
 LDFLAGS = -melf_i386 -g

@@ -9,7 +9,7 @@
 .globl vec5;    vec5:   pushl $0;  pushl    $5; jmp trap
 .globl vec6;    vec6:   pushl $0;  pushl    $6; jmp trap
 .globl vec7;    vec7:   pushl $0;  pushl    $7; jmp trap
-.globl vec8;    vec8:              pushl    $8; jmp trap
+.globl vec8;    vec8:   		   pushl    $8; jmp trap
 .globl vec9;    vec9:   pushl $0;  pushl    $9; jmp trap
 .globl vec10;   vec10:             pushl   $10; jmp trap
 .globl vec11;   vec11:             pushl   $11; jmp trap
@@ -23,7 +23,8 @@
 .globl irqall; irqall:  pushl $0;  pushl   $-1; jmp trap
 
 .extern irq_handle
-.extern pcb_current
+//.extern pcb_current
+.extern tf_retrun
 trap:
 	cli
 	pushl %ds
@@ -38,12 +39,11 @@ trap:
 
 	pushl %esp
 	call irq_handle
-	
-	movl (pcb_current),%esi
-	movl 0(%esi),%esp
+//	movl (pcb_current),%esi
+//	movl 0(%esi),%esp
+	movl tf_return, %esp
 
-//	addl $4, %esp
-	
+
 	popal
 	popl %gs
 	popl %fs

@@ -1,3 +1,13 @@
+#include "thread.h"
+#include "drivers/hal.h"
+#include "common.h"
+#include "debug.h"
+#include "drivers/tty.h"
+
+
+
+
+
 void
 echo() {
 	static int tty = 1;
@@ -11,8 +21,9 @@ echo() {
 		if (dev != NULL) {
 			dev_write(dev, 0, name, 4);
 			dev_write(dev, 0, "# ", 2);
+			/* nread is number of read */
 			int i, nread = dev_read(dev, 0, buf, 255);
-			buf[nread] = 0;
+			buf[nread] = 0;            //Should be '\0'
 			for (i = 0; i < nread; i ++) {
 				if (buf[i] >= 'a' && buf[i] <= 'z') {
 					buf[i] += 'A' - 'a';

@@ -1,11 +1,20 @@
 #ifndef __IRQ_H__
 #define __IRQ_H__
 
+#define NR_EVENT 5
+#define NR_EVENT_FUNC 30
 void init_idt(void);
-void init_i8259(void);
+void init_irq();
+void init_i8529();
 
-//void set_timer_intr_handler( void (*ptr)(void) );
-void set_switch_intr_handler( void (*ptr)(TrapFrame*) );
+void add_irq_handle(int irq_id, void (*func)(void));
+
+struct Irq_Pool{
+	void (*func)(void);
+	struct Irq_Pool *next;
+};
+typedef struct Irq_Pool Irq_Pool;
+
 // interrupt and exception entries
 void irq0();
 void irq1();

@@ -1,6 +1,6 @@
-#include "mods/tty.h"
-#include "mods/time.h"
-#include "term.h"
+#include "drivers/tty.h"
+#include "drivers/time.h"
+#include "drivers/term.h"
 
 extern char banner[SCR_W + 1];
 

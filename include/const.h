@@ -5,6 +5,6 @@
 #define FALSE        0
 
 #define NULL         ((void*)0)
-#define MAX_THREAD 10
+#define MAX_THREAD 15
 #define STACK_SIZE 4096
 #endif

@@ -1,14 +1,15 @@
-#include "mods/tty.h"
-#include "mods/msg.h"
+#include "drivers/tty.h"
+#include "msg.h"
 #include "x86.h"
 #include "debug.h"
-#include "term.h"
+#include "drivers/term.h"
 
 void
 send_keymsg(void) {
-	Message m;
-	m.type = MSG_TTY_GETKEY;
-	send(TTY, &m);
+//	Message m;
+//	m.type = MSG_TTY_GETKEY;
+//	send(TTY, &m);
+	printk("\n\n\n\n\n\n\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n\n\n\n\n");
 }
 
 static int caps, ctrl, alt, shft;
