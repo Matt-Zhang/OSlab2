@@ -58,18 +58,19 @@ Device *hal_get(const char *name) {
 	unlock();
 	return NULL;
 }
-
+/* The first sentence is used to set the space of m to me Message */
 static size_t
 dev_rw(int type, Device *dev, size_t offset, void *buf, size_t count) {
-	DevMessage m;
-	m.header.type = type;
-	m.dev_id = dev->dev_id;
-	m.offset = offset;
-	m.buf = buf;
-	m.count = count;
-	send(dev->pid, (Message*)&m);
-	receive(dev->pid, (Message*)&m);
-	return m.header.type;
+	Message message;
+	DevMessage *m = (DevMessage*)&message;
+	m->header.type = type;
+	m->dev_id = dev->dev_id;
+	m->offset = offset;
+	m->buf = buf;
+	m->count = count;
+	send(dev->pid, (Message*)m);
+	receive(dev->pid, (Message*)m);
+	return m->header.type;
 }
 
 size_t

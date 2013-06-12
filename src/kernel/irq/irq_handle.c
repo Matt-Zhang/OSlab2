@@ -62,7 +62,7 @@ irq_handle(TrapFrame *tf) {
 				ptr->func();
 				ptr = ptr->next;
 			}
-			printk("\nIRQ = %d\n", irq);  
+//			printk("\nIRQ = %d\n", irq);  
 		}
 	}
 	pcb_current->state = RUNNING;

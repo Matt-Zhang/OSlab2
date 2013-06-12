@@ -12,6 +12,8 @@ typedef struct MsgHead MsgHead;
 
 struct DevMessage {
 	MsgHead header; // header与Message的头部定义保持一致即可(src, dst, type)
+//	int type;
+//	pid_t src, dest;
 	int dev_id;
 	size_t offset;
 	void *buf;

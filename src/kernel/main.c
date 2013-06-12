@@ -41,10 +41,11 @@ os_init(void) {
 	init_tty();
 	init_msg();
 	printk("The OS is now working!\n");
+	wakeup(create_kthread(ttyd));
 	/* Setup four ttys */
-//	test();
-	wakeup(create_kthread(test1));
-	wakeup(create_kthread(test2));
+	test();
+//	wakeup(create_kthread(test1));
+//	wakeup(create_kthread(test2));
 	sti();
 	while (TRUE) {
 		wait_intr();

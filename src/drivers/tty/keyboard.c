@@ -6,10 +6,10 @@
 
 void
 send_keymsg(void) {
-//	Message m;
-//	m.type = MSG_TTY_GETKEY;
-//	send(TTY, &m);
-	printk("\n\n\n\n\n\n\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n\n\n\n\n");
+	Message m;
+	m.type = MSG_TTY_GETKEY;
+	send(TTY, &m);
+//	printk("\n\n\n\n\n\n\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n\n\n\n\n");
 }
 
 static int caps, ctrl, alt, shft;

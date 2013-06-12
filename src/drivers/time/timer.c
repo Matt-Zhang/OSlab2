@@ -6,8 +6,6 @@
 #include "thread.h"
 #include "irq.h"
 #include "drivers/time.h"
-#define PORT_PIC_MS    0x20
-#define PORT_PIC_SL    0xA0
 pid_t TIME;
 
 long jiffy = 0;
@@ -15,7 +13,7 @@ void timerd(void);
 static Time rt;
 
 void init_i8253(void);
-//void update_sched(void);
+void update_sched(void);
 void schedule();
 void update_jiffy(void);
 int read_rtc(int);
@@ -25,7 +23,7 @@ void init_timer(void) {
 	add_irq_handle(0, update_sched);
 	add_irq_handle(0, update_jiffy);
 
-/*	int tmp;
+	int tmp;
 	do {
 		rt.second = read_rtc(0);
 		rt.minute = read_rtc(2);
@@ -35,7 +33,7 @@ void init_timer(void) {
 		rt.year = read_rtc(9) + 2000;
 		tmp = read_rtc(0);
 	} while (tmp != rt.second);
-*/
+
 }
 
 static int md(int year, int month) {
@@ -55,7 +53,8 @@ void update_jiffy(void) {
 	}
 }
 void update_sched(void) {
-	schedule();
+	if(jiffy % 10 == 0)
+		schedule();
 }
 
 void init_i8253(void) {

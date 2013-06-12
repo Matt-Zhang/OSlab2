@@ -1,4 +1,5 @@
 #include "irq.h"
+#include "x86.h"
 
 void init_i8529()
 {

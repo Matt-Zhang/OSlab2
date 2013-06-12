@@ -3,6 +3,8 @@
 
 #define NR_EVENT 5
 #define NR_EVENT_FUNC 30
+#define PORT_PIC_MS    0x20
+#define PORT_PIC_SL    0xA0
 void init_idt(void);
 void init_irq();
 void init_i8529();

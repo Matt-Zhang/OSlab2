@@ -9,7 +9,7 @@
 #define LBUF_SZ        256
 #define CBUF_SZ        1024
 #define RSTK_SZ        16
-#define TTY            2
+#define TTY            1
 
 struct Console {
 	const char *name;
