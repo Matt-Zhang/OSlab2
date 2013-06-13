@@ -3,12 +3,14 @@
 #include "x86.h"
 #include "debug.h"
 #include "drivers/term.h"
-
+/* Will cause the nested interrupt, which is not tested */
 void
 send_keymsg(void) {
-	Message m;
-	m.type = MSG_TTY_GETKEY;
-	send(TTY, &m);
+	Message m;NOINTR;
+	m.type = MSG_TTY_GETKEY;NOINTR;
+	sti();INTR;
+	send(TTY, &m);INTR;
+	cli();
 //	printk("\n\n\n\n\n\n\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n\n\n\n\n");
 }
 

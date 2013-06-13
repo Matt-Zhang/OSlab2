@@ -65,8 +65,8 @@ void
 sleep()
 {
 	pcb_current->state = STOPPED;NOINTR;
-//	printk("SLEEP: %d\n", pcb_current->pid);
-	unlock();INTR;
+	printk("SLEEP: %d\n", pcb_current->pid);NOINTR;
+	unlock();
 	/* if no pcb can be runned, an assertation will be raised in schedule();*/ 
 	interrupt();
 }
@@ -77,7 +77,7 @@ wakeup(PCB *pcb)
 	pcb->state = INTERRUPTED;NOINTR;
 //	if(pcb_current == NULL)
 //		sti();
-//	printk("WAKEUP %d\n", pcb->pid);NOINTR;
+	printk("WAKEUP %d\n", pcb->pid);NOINTR;
 }
 	
 
@@ -110,3 +110,4 @@ void V(Semaphore *sem) {
     }
 	unlock();INTR;
 }
+

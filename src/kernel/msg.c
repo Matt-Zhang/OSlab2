@@ -6,18 +6,19 @@
 #include "string.h"
 
 extern PCB* pcb_current;
-static Semaphore message_buffer, process_mailbox[MAX_THREAD], empty;
+static Semaphore message_buffer, process_mailbox[MAX_THREAD][MAX_THREAD];
 static ListHead head;
-Mailbox mailbox[MAX_MAIL];
+static Mailbox mailbox[MAX_MAIL];
 int mail_iter = -1;
 
 void init_msg()
 {
 	new_sem(&message_buffer, 1);
-	new_sem(&empty, 0);
-	int i;
+	int i, j;
 	for (i = 0; i < MAX_THREAD; i++) {
-		new_sem(&process_mailbox[i], 0);
+		for(j = 0; j < MAX_THREAD; j++) {
+			new_sem(&process_mailbox[i][j], 0);
+		}
 	}
 	for (i = 0; i < MAX_MAIL; i++) {
 		mailbox[i].use = 0;
@@ -38,67 +39,74 @@ void in_mailbox(Message *m)
 	list_add_before(&head, &(mail->link));
 }
 
-void out_mailbox(Message *m, pid_t dst)
+void out_mailbox(Message *m, pid_t src, pid_t dst)
 {
 	ListHead *temp = NULL;
 	Mailbox *mail = NULL;
 	list_foreach(temp, &head) {
 		mail = list_entry(temp, Mailbox, link);
-		if (mail->message.dest == dst) {
-			memcpy(&(mail->message), m, sizeof(Message));
+		if (mail->message.src == src && mail->message.dest == dst && mail->use == 1) {
+			memcpy(m, &(mail->message), sizeof(Message));
 			list_del(&(mail->link));
 			mail->use = 0;
+			break;
 		}
 	}
 }
+void out_mailbox_any(Message *m, pid_t dst)
+{
+	ListHead *temp = NULL;
+	Mailbox *mail = NULL;
+	P(&message_buffer);
+	list_foreach(temp, &head) {
+		mail = list_entry(temp, Mailbox, link);
+		if (mail->message.dest == dst && mail->use == 1) {
+			V(&message_buffer);
+			P(&process_mailbox[mail->message.src][dst]);
+			P(&message_buffer);
+			memcpy(m, &(mail->message), sizeof(Message));
+			list_del(&(mail->link));
+			mail->use = 0;
+			break;
+		}
+	}
+	printk("%d receive from ANY(%d), type: %d\n", dst, mail->message.src, mail->message.type);
+	V(&message_buffer);
+}
 /* We assume we will not sti() in the whole interrupt process which sound reasonable in nanos */
+/* Because a pid will not send to itself, process_mailbox[a][a] shows whether the dest_a is empty */
 void send(pid_t dst, Message *m)
 {
-	printk("%d send to %d and type: %d\n", pcb_current->pid, dst, m->type);
 	m->dest = dst;
 	if(pcb_current->state == INTERRUPTED) {
-		m->src = MSG_HWINTR;NOINTR;
-		in_mailbox(m);	NOINTR;
-		/* equal to V */
-		process_mailbox[m->dest].count++;NOINTR;	
-		if(process_mailbox[m->dest].count <= 0) {
-			PCB *pcb = list_entry(process_mailbox[m->dest].queue.next, PCB, semq); NOINTR;
-			list_del(process_mailbox[m->dest].queue.next);NOINTR;
-			wakeup(pcb);NOINTR;
-		}
+		m->src = MSG_HWINTR;//NOINTR;
+		printk("0(%d) send to %d and type: %d\n", pcb_current->pid, dst, m->type);
 	}
 	else{
 		m->src = pcb_current->pid;
+		printk("%d send to %d and type: %d\n", pcb_current->pid, dst, m->type);
+	}
 		P(&message_buffer);INTR;
 		in_mailbox(m);INTR;
-		V(&empty);INTR;
-		assert(empty.count <= MAX_MAIL);INTR;
 		V(&message_buffer);INTR;
-		V(&process_mailbox[m->dest]);INTR;
-	}
-	
+		V(&process_mailbox[dst][dst]);INTR;
+		V(&process_mailbox[m->src][dst]);INTR;
 }
 
-void receive(pid_t dst, Message *m)
+void receive(pid_t src, Message *m)
 {
 	assert(pcb_current->state != INTERRUPTED);
-	P(&empty);INTR;
-	if(dst != ANY) {
-		P(&process_mailbox[dst]);INTR;
+	int dst = pcb_current->pid; 
+	P(&process_mailbox[dst][dst]);INTR;
+	if(src != ANY) {
+		P(&process_mailbox[src][dst]);INTR;
 		P(&message_buffer);INTR;
-		out_mailbox(m, dst);INTR;
-		printk("%d receive from %d\n", pcb_current->pid, dst);
+		out_mailbox(m, src, dst);INTR;
+		printk("%d receive from %d and type:%d\n", dst, src, m->type);
 		V(&message_buffer);INTR;
 	}
 	else {
-		Mailbox *mail = list_entry(head.next, Mailbox, link);
-		int dest = mail->message.dest;INTR;
-		P(&process_mailbox[dest]);INTR;
-		P(&message_buffer);INTR;
-		out_mailbox(m, dest);INTR;
-		printk("%d receive from ANY(%d)\n", pcb_current->pid, dest);
-		V(&message_buffer);
+		out_mailbox_any(m, dst);
 	}
-	printk("m.type: %d\n", m->type);
 }
 

@@ -19,7 +19,7 @@ void init_hal(void) {
 	}
 	list_init(&devices);
 }
-
+/* All consols' pid is TTY (1) and dev_id is 0 to 3 */
 void hal_register(const char *name, pid_t pid, int dev_id) {
 	lock();
 	if (list_empty(&free)) {
@@ -59,6 +59,7 @@ Device *hal_get(const char *name) {
 	return NULL;
 }
 /* The first sentence is used to set the space of m to me Message */
+/* In DevMassage, header->type is used to convey the number of letters */
 static size_t
 dev_rw(int type, Device *dev, size_t offset, void *buf, size_t count) {
 	Message message;

@@ -153,7 +153,9 @@ read_request(DevMessage *m) {
 	} else {
 		int nread = get_cooked(c, m->buf, m->count);
 		m->header.type = nread;
+		printk("sending!\n");
 		send(m->header.src, (Message*)m);
+		printk("send from read_request\n" );
 	}
 }
 
@@ -257,13 +259,15 @@ init_consl(Console *c, uint16_t *vbuf) {
 	c->rtop = 0;
 	consl_sync(c);
 }
-
+/* Cause the nested interrupt */
 static void
 send_updatemsg(void) {
 	if (jiffy % (HZ / 10) == 0) {
-		Message m;
-		m.type = MSG_TTY_UPDATE;
+		Message m;NOINTR;
+		m.type = MSG_TTY_UPDATE;NOINTR;
+		sti();
 		send(TTY, &m);
+		cli();
 	}
 }
 

@@ -40,7 +40,9 @@ irq_handle(TrapFrame *tf) {
 	}
 	else{
 		pcb_current->tf[pcb_current->count_tf ++] = tf;
-		pcb_current->state = INTERRUPTED;
+		if(pcb_current->state != STOPPED) {
+			pcb_current->state = INTERRUPTED;
+		}
 		assert(pcb_current->count_tf < NR_TF);
 		int irq = tf->irq;
 		assert(irq >= 0);
