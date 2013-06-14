@@ -53,7 +53,6 @@ void update_jiffy(void) {
 	}
 }
 void update_sched(void) {
-	if(jiffy % 10 == 0)
 		schedule();
 }
 

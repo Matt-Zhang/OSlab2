@@ -153,9 +153,9 @@ read_request(DevMessage *m) {
 	} else {
 		int nread = get_cooked(c, m->buf, m->count);
 		m->header.type = nread;
-		printk("sending!\n");
+	//	printk("sending!\n");
 		send(m->header.src, (Message*)m);
-		printk("send from read_request\n" );
+	//	printk("send from read_request\n" );
 	}
 }
 
@@ -193,7 +193,9 @@ consl_accept(Console *c, char ch) {
 	int i, cc = 0;
 	for (; c->lbuf[c->i + cc] != 0; cc ++);
 	for (i = cc + 1; i > 0; i --) {
-		if (c->i + i >= LBUF_SZ) panic("line buffer full");
+		if (c->i + i >= LBUF_SZ) { 
+			panic("line buffer full");
+		}
 		c->lbuf[c->i + i] = c->lbuf[c->i + i - 1];
 		if (c->vbuf + c->pos + i == c->scr + c->wh + 1) {
 			scrup(c);

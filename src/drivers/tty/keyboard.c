@@ -30,7 +30,8 @@ readkey(void) {
 			case K_ALT: alt --; break;
 			case K_CAPS: caps &= 1; break;
 		}
-	} else {
+	} 
+	else {
 		int c = keychar[0][code];
 		if (c >= 'a' && c <= 'z') {
 			c = keychar[(shft & 1) ^ (caps & 1)][code];

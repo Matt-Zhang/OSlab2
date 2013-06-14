@@ -10,7 +10,7 @@
 #define CBUF_SZ        1024
 #define RSTK_SZ        16
 #define TTY            1
-
+/* f:finish cook. r:ready cook*/
 struct Console {
 	const char *name;
 	uint16_t *vbuf;

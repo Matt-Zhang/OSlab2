@@ -29,6 +29,12 @@ void test2(){
 	}
 }
 
+void idle()
+{
+	while(TRUE){
+		wait_intr();
+	}
+}
 
 void
 os_init(void) {
@@ -46,6 +52,7 @@ os_init(void) {
 	test();
 //	wakeup(create_kthread(test1));
 //	wakeup(create_kthread(test2));
+	wakeup(create_kthread(idle));
 	sti();
 	while (TRUE) {
 		wait_intr();

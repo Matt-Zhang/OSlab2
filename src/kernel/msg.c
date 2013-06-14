@@ -26,6 +26,17 @@ void init_msg()
 	list_init(&head);
 }
 
+void test_full()
+{
+	int i;
+	int sum = 0;
+	for (i = 0; i < MAX_THREAD; i++) {
+		sum += process_mailbox[i][i].count; 
+	}
+	if(sum > MAX_MAIL)
+		panic("TOO much mails");
+}
+
 void in_mailbox(Message *m)
 {
 	do{
@@ -57,21 +68,25 @@ void out_mailbox_any(Message *m, pid_t dst)
 {
 	ListHead *temp = NULL;
 	Mailbox *mail = NULL;
-	P(&message_buffer);
+//	P(&message_buffer);
+	lock();
 	list_foreach(temp, &head) {
 		mail = list_entry(temp, Mailbox, link);
 		if (mail->message.dest == dst && mail->use == 1) {
-			V(&message_buffer);
+//			V(&message_buffer);
+			unlock();INTR;
 			P(&process_mailbox[mail->message.src][dst]);
-			P(&message_buffer);
-			memcpy(m, &(mail->message), sizeof(Message));
-			list_del(&(mail->link));
-			mail->use = 0;
+//			P(&message_buffer);
+			lock();
+			memcpy(m, &(mail->message), sizeof(Message));NOINTR;
+			list_del(&(mail->link));NOINTR;
+			mail->use = 0;NOINTR;
 			break;
 		}
 	}
 	printk("%d receive from ANY(%d), type: %d\n", dst, mail->message.src, mail->message.type);
-	V(&message_buffer);
+	unlock();
+//	V(&message_buffer);
 }
 /* We assume we will not sti() in the whole interrupt process which sound reasonable in nanos */
 /* Because a pid will not send to itself, process_mailbox[a][a] shows whether the dest_a is empty */
@@ -81,16 +96,22 @@ void send(pid_t dst, Message *m)
 	if(pcb_current->state == INTERRUPTED) {
 		m->src = MSG_HWINTR;//NOINTR;
 		printk("0(%d) send to %d and type: %d\n", pcb_current->pid, dst, m->type);
+		in_mailbox(m);
+		V(&process_mailbox[dst][dst]);
+		V(&process_mailbox[m->src][dst]);
 	}
 	else{
 		m->src = pcb_current->pid;
-		printk("%d send to %d and type: %d\n", pcb_current->pid, dst, m->type);
-	}
-		P(&message_buffer);INTR;
-		in_mailbox(m);INTR;
-		V(&message_buffer);INTR;
+		printk("%d send to %d and type: %d\n", pcb_current->pid, dst, m->type);	
+	//	P(&message_buffer);INTR;
+		lock();
+		in_mailbox(m);NOINTR;
+		unlock();
+	//	V(&message_buffer);INTR;
 		V(&process_mailbox[dst][dst]);INTR;
+		test_full();
 		V(&process_mailbox[m->src][dst]);INTR;
+	}
 }
 
 void receive(pid_t src, Message *m)
@@ -100,13 +121,14 @@ void receive(pid_t src, Message *m)
 	P(&process_mailbox[dst][dst]);INTR;
 	if(src != ANY) {
 		P(&process_mailbox[src][dst]);INTR;
-		P(&message_buffer);INTR;
-		out_mailbox(m, src, dst);INTR;
+//		P(&message_buffer);INTR;
+		lock();
+		out_mailbox(m, src, dst);NOINTR;
 		printk("%d receive from %d and type:%d\n", dst, src, m->type);
-		V(&message_buffer);INTR;
+//		V(&message_buffer);INTR;
+		unlock();
 	}
 	else {
 		out_mailbox_any(m, dst);
 	}
 }
-
